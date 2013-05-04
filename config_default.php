@@ -3,7 +3,7 @@
  * COPS (Calibre OPDS PHP Server) class file
  *
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
- * @author     Sébastien Lucas <sebastien@slucas.fr>
+ * @author     SÃ©bastien Lucas <sebastien@slucas.fr>
  */
 
     if (!isset($config))
@@ -17,8 +17,8 @@
      * BEWARE : it has to end with a /
      */
 	
-    $config['calibre_directory'] = 'https://dl.dropbox.com/u/44470709/ebooks/calibre/';
-	$config['download_directory'] = 'https://api-content.dropbox.com/u/44470709/ebooks/calibre/';
+    $config['calibre_directory'] = 'http://dl.dropboxusercontent.com/u/44470709/ebooks/calibre/';
+	$config['download_directory'] = 'http://api-content.dropbox.com/u/44470709/ebooks/calibre/';
 	
 	/*
      * The local directory of the metadata.db.
@@ -31,7 +31,7 @@
      * The internal directory set in nginx config file
      * or the same directory as calibre_directory with X-Sendfile
      */
-    $config['calibre_internal_directory'] = 'https://dl.dropbox.com/u/44470709/ebooks/calibre/'; 
+    $config['calibre_internal_directory'] = 'http://dl.dropboxusercontent.com/u/44470709/ebooks/calibre/'; 
 
     /*
      * Full URL prefix (with trailing /)

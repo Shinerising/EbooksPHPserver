@@ -33,6 +33,7 @@
 	else if($currentPage->book)
 	{
 	$ogtitle=$config['cops_title_default']." - 《".htmlspecialchars($currentPage->book->title)."》";
+	$ogimg=str_replace(array('%2F','%3A'),array('/',':'), rawurlencode ($currentPage->book->getFilePath ("jpg")));
 	foreach($currentPage->book->getAuthors() as $author)
 	{
 	$ogtitle=$ogtitle." ".htmlspecialchars ($author->name);
@@ -69,12 +70,12 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <meta http-equiv="imagetoolbar" content="no" />
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<meta name="viewport" content="width=400, initial-scale=0.85, user-scalable=no" />
     <title><?php echo htmlspecialchars ($currentPage->title) ?></title>
 	<meta name="title" property="og:title" content="<?php echo $ogtitle ?>" />
-	<meta name="description" property="og:description" content="Wayne's Ebooks" />
+	<meta name="coverimage" property="og:image" content="<?php echo $ogimg ?>" />
+	<meta name="description" property="og:description" content="Wayne's Ebook Cloud Library." />
 	<link rel="icon" type="image/vnd.microsoft.icon" href="favicon.ico" />
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
 	<script type="text/javascript" src="js/jquery.lazyload.min.js"></script>
@@ -106,7 +107,7 @@
 		
 		function readbook(s1,s2)
 		{
-			$('#readbutton').text("Please waiting...");
+			$('#readbutton').text("Please wait...");
 			$.get(s1, function(data) {
 				document.location.href=s2;
 				$('#readbutton').text("Redirecting...");
@@ -133,7 +134,9 @@
 ?> 
     </script>
 </head>
+
 <body itemscope itemtype="http://schema.org/Books">
+
 <div id="loading">
   <p><img src="images/ajax-loader.gif" alt="waiting" /> Please Wait</p>
 </div>
@@ -188,11 +191,12 @@
 	<div class="bookpopup">
     <div class="detailarea">
         <div class="detailcover">
-            <img itemprop="image" class="detailimg" src="fetch.php?id=<?php echo $book->id ?>&width=288" alt="cover" />
+            <img class="detailimg" src="data:image/gif;base64,R0lGODlhAQABAIAAAMLCwgAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" data-original="fetch.php?id=<?php echo $book->id ?>&width=288" alt="cover" />
         </div>
 		<div class="detail">
 		<div class="booktitle"><?php echo htmlspecialchars ($book->title) ?></div>
         <div class="entrySection">
+			<span>Read: </span>
 <?php
             foreach ($book->getDatas() as $data)
             {
@@ -205,7 +209,7 @@
 ?>
         </div>
         <div class="entrySection">
-			<span>Download </span>
+			<span>Download: </span>
 <?php
             foreach ($book->getDatas() as $data)
             {
@@ -216,7 +220,7 @@
 ?>
         </div>
         <div class="entrySection">
-            <span><?php echo localize("authors.title") ?> </span>
+            <span><?php echo localize("authors.title") ?>: </span>
             <div class="buttonEffect pad6">
 <?php
             $i = 0;
@@ -230,7 +234,7 @@
             </div>
         </div>
         <div class="entrySection">
-            <span><?php echo localize("tags.title") ?> </span>
+            <span><?php echo localize("tags.title") ?>: </span>
             <div class="buttonEffect pad6">
 <?php
             $i = 0;
@@ -248,10 +252,11 @@
         {
 ?>
         <div class="entrySection">
+			<span><?php echo localize("series.title") ?>: </span>
+            <?php echo str_format(localize ("content.series.data"),$book->seriesIndex,"") ?> <br>
             <div class="buttonEffect pad6">
-                <a href="index.php<?php echo str_replace ("&", "&amp;", $serie->getUri ()) ?>"><?php echo localize("series.title") ?></a>
+                <a href="index.php<?php echo str_replace ("&", "&amp;", $serie->getUri ()) ?>"><?php echo htmlspecialchars ($serie->name) ?></a>
             </div>
-            <?php echo str_format (localize ("content.series.data"), $book->seriesIndex, htmlspecialchars ($serie->name)) ?>
         </div>
 <?php
         }
@@ -299,7 +304,7 @@
             <?php
                 if ($entry->book->hasCover) {
             ?>
-                <a rel="group" class="fancycover" href="index.php?page=13&id=<?php echo $entry->book->id ?>"><img class="coverimg" src="<?php echo $entry->getCoverThumbnail () ?>" alt="cover" /></a>
+                <a rel="group" class="fancycover" href="index.php?page=13&id=<?php echo $entry->book->id ?>"><img class="coverimg" src="data:image/gif;base64,R0lGODlhAQABAIAAAMLCwgAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" data-original="<?php echo $entry->getCoverThumbnail () ?>" alt="cover" /></a>
             <?php
                 }
             ?>
@@ -367,5 +372,9 @@
 ?>
     </div>
 </div>
+	<script type="text/javascript">
+	$("img.detailimg").lazyload({effect:"fadeIn"});
+	$("img.coverimg").lazyload({effect:"fadeIn"});
+	</script>
 </body>
 </html>

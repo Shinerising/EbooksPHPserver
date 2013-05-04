@@ -3,7 +3,7 @@
  * COPS (Calibre OPDS PHP Server) class file
  *
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
- * @author     Sébastien Lucas <sebastien@slucas.fr>
+ * @author     SÃ©bastien Lucas <sebastien@slucas.fr>
  */
 
 define ("VERSION", "0.2.2");
@@ -442,7 +442,7 @@ abstract class Base
             try {
                 self::$db = new PDO('sqlite:'. $config['local_directory'] .'metadata.db');
             } catch (Exception $e) {
-                echo $e;
+                //echo $e;
                 die($e);
             }
         }

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 	class bookinfo{
 	
@@ -42,7 +42,8 @@
 		}
 		if($this->ncxurl){
 			$this->ncx=simplexml_load_file($this->ncxurl);
-			self::getnode($this->ncx->navMap->navPoint);
+			if($this->ncx->navMap->navPoint==null)self::getnode($this->ncx->head->navMap->navPoint);
+			else self::getnode($this->ncx->navMap->navPoint);
 			//foreach($this->ncx->navMap->navPoint as $chpt){
 				//array_push($this->chapterpage, new chapter($chpt['id'],$chpt['playOrder'],$chpt->navLabel->text,$this->readdir.$chpt->content['src']));
 			//}
@@ -74,6 +75,22 @@
 		}
 	}
 	
+	require_once ("config.php");
+    require_once ("book.php");
+    require_once ("data.php");
+     
+    global $config;
+	
+    $bookId = getURLParam ("id", NULL);
+    $idData = getURLParam ("data", NULL);
+    if (is_null ($bookId))
+    {
+        $rbook = Book::getBookByDataId($idData);
+    }
+    else
+    {
+        $rbook = Book::getBookById($bookId);
+    }
 
 	require_once("simple_html_dom.php");
 	ini_set('memory_limit', '64M');
@@ -81,14 +98,24 @@
     header ("Content-Type:text/html; charset=utf-8");
 	
 	$url=$_SERVER[REQUEST_URI];
+	if($bookId!=null){
+	    foreach ($rbook->getDatas() as $data)
+            {
+                if($data->format=="EPUB"){
+				$name = str_replace ("&", "&amp;", rawurlencode($data->book->relativePath."/".$data->getFilename ()));
+				}
+			}
+	}
+	else{
 	$urlarray=explode('name=',$url);
 	$name=$urlarray[1];
+	}
 	
 	$chapid=$_GET['chapter'];
 	
 	$m=file_get_contents("http://ebooks.wayshine.us/download.php?n=2&name=$name");
 	
-	if($m=="0"){
+	if($m==null){
 	echo "Error!";
 	}
 	else {
@@ -113,7 +140,7 @@
 	}
 	
 	$page=file_get_html($chapternow->url);
-	
+		
 	$title=$page->find("title");
 	$titlestr=$title[0]->innertext;
 	$img=$page->find("img");
@@ -127,40 +154,41 @@
 	
 	$a=$page->find("a");
 	foreach($a as $at) {
-		if(substr($at->href,0,4)!="http")$at->href="http://ebooks.wayshine.us/read.php?chapter=".pathinfo($at->href, PATHINFO_FILENAME)."&name=$name";
+		if(substr($at->href,0,4)!="http")$at->href="http://ebooks.wayshine.us/read.php?chapter=".pathinfo($at->href, PATHINFO_FILENAME)."&id=$bookId";
 	}
 	
 	$body=$page->find("body");
 	$bodystr=$body[0]->innertext;
 	
 	$page->clear();
-	
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<meta name="viewport" content="width=400, initial-scale=0.85, user-scalable=no" />
-    <title><?php echo $book->bookname ?></title>
-	<link rel="icon" type="image/vnd.microsoft.icon" href="favicon.ico">
+    <title><?php echo htmlspecialchars ($book->bookname) ?></title>
+	<link rel="icon" type="image/vnd.microsoft.icon" href="favicon.ico" />
 	<meta name="title" property="og:title" content="<?php echo $book->bookname ?>" />
 	<meta name="coverimage" property="og:image" content="http://ebooks.wayshine.us/<?php echo $book->coverimg ?>" />
 	<meta name="description" property="og:description" content="Wayne's Ebooks Online Reading" />
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
 	<script type="text/javascript" src="js/jquery.lazyload.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="read.css" media="screen" />
     <link rel="stylesheet" type="text/css" href="<?php echo $book->cssfile ?>" media="screen" />
     <link rel="stylesheet" type="text/css" href="style.css" media="screen" />
 	<script type="text/javascript">
 		function pagescroll(id){
-			if(id==0)$("body").animate({scrollTop:0},200);
-			else $("body").animate({scrollTop:$("body").scrollTop()+id*$(window).height()},200);
+			if(id==0)$("body").animate({scrollTop:0},1000);
+			else $("body").animate({scrollTop:$("body").scrollTop()+id*$(window).height()},1000);
 		}
 	</script>
 </head>
-<body itemscope="" itemtype="http://schema.org/Books" screen_capture_injected="true" id="readbody">
+<body itemscope="body" itemtype="http://schema.org/Books" screen_capture_injected="true" id="readbody">
 <div id="loading" style="display:none">
   <p><img src="images/ajax-loader.gif" alt="waiting"> Please Wait</p>
 </div>
+<div class="summary" itemprop="description" style="display:none"><?php echo $book->des ?></div>
 <div class="container">
     <div class="head" id="aeaoofnhgocdbnbeljkmbjdmhbcokfdb-mousedown">
         <div class="headleft">
@@ -185,7 +213,8 @@
 			<?php
 					echo "<div class='guidehead'><b>Guide</b></div>";
 				foreach($book->chapterpage as $chpt) {
-					echo "<div class='guidelist'><a href='http://ebooks.wayshine.us/read.php?chapter=".(string)$chpt->id."&name=$name'>".(string)$chpt->title."</a></div>";
+					echo "<div class='sline'></div>";
+					echo "<div class='guidelist'><a href='http://ebooks.wayshine.us/read.php?chapter=".(string)$chpt->id."&id=$bookId'>".(string)$chpt->title."</a></div>";
 				}
 			?>
 		</div>
@@ -196,11 +225,12 @@
         </div>
 		<div class="footcenter">
 		<?php
-			if($chapterprevious)echo "<a href='http://ebooks.wayshine.us/read.php?chapter=".(string)$chapterprevious->id."&name=$name'><img src='images/previous.png' alt='Previous' /></a>";
+			if($chapterprevious)echo "<a href='http://ebooks.wayshine.us/read.php?chapter=".(string)$chapterprevious->id."&id=$bookId'><img src='images/previous.png' alt='Previous' /></a>";
 			echo "&nbsp;" . $currectindex . " / " . $book->chapternum . "&nbsp;";
-			if($chapternext)echo "<a href='http://ebooks.wayshine.us/read.php?chapter=".(string)$chapternext->id."&name=$name'><img src='images/next.png' alt='Next' /></a>";
+			if($chapternext)echo "<a href='http://ebooks.wayshine.us/read.php?chapter=".(string)$chapternext->id."&id=$bookId'><img src='images/next.png' alt='Next' /></a>";
 		?>
 		</div>
+		<div class="footback" onclick="javascript:pagescroll(0)"></div>
     </div>
 </div>
 
@@ -209,7 +239,7 @@
 <div id="ytCinemaMessage" style="display: none;"></div><div><object id="ClCache" click="sendMsg" host="" width="0" height="0"></object></div>
 	<script type="text/javascript">
 	
-	$("img.bookimage").lazyload();
+	$("img.bookimage").lazyload({effect:"fadeIn"});
 		
 	var guideshow = false;
 	var guideheight = $('#bookguide').css('height');

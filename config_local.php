@@ -16,7 +16,7 @@
      * and the calibre_internal_directory has to be set properly
      * BEWARE : it has to end with a /
      */
-    $config['calibre_directory'] = 'https://dl.dropbox.com/u/44470709/ebooks/';
+    $config['calibre_directory'] = 'https://dl.dropboxusercontent.com/u/44470709/ebooks/';
 	
     /*
      * The internal directory set in nginx config file

@@ -3,9 +3,8 @@
  * COPS (Calibre OPDS PHP Server) 
  *
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
- * @author     Gordon Page <gordon@incero.com> with integration/modification by Sébastien Lucas <sebastien@slucas.fr>
+ * @author     Gordon Page <gordon@incero.com> with integration/modification by SÃ©bastien Lucas <sebastien@slucas.fr>
  */
-    
     require_once ("config.php");
     require_once ("book.php");
     require_once ("data.php");
@@ -26,14 +25,15 @@
     {
         $book = Book::getBookById($bookId);
     }
-     
+	
     switch ($type)
     {
         case "jpg":
-            header("Content-type: image/jpeg");
+            header("Content-Type: image/jpeg");
             if (isset($_GET["width"]))
             {
-                $file = str_replace(array('%2F','%3A'),array('/',':'), rawurlencode ($book->getFilePath ($type)));
+                $file = $book->getFilePath ($type);
+				$file = str_replace(array('%2F','%3A'),array('/',':'), rawurlencode ($file));
                 // get image size
                 if($size = GetImageSize($file)){
                     $w = $size[0];
@@ -58,9 +58,10 @@
             }
             if (isset($_GET["height"]))
             {
-                $file = str_replace(array('%2F','%3A'),array('/',':'), rawurlencode ($book->getFilePath ($type)));
+                $file = $book->getFilePath ($type);
+				$file = str_replace(array('%2F','%3A'),array('/',':'), rawurlencode ($file));
                 // get image size
-                if($size = GetImageSize($file)){
+				if($size = GetImageSize($file)){
                     $w = $size[0];
                     $h = $size[1];
                     //set new size
@@ -76,17 +77,41 @@
                 $src_img = imagecreatefromjpeg($file);
                 $dst_img = imagecreatetruecolor($nw,$nh);
                 imagecopyresampled($dst_img, $src_img, 0, 0, 0, 0, $nw, $nh, $w, $h);//resizing the image
-                imagejpeg($dst_img,null,100);
+                imagejpeg($dst_img,'',100);
                 imagedestroy($src_img);
                 imagedestroy($dst_img);
                 return;
             }
             break;
         default:
-            header("Content-type: " . Data::$mimetypes[$type]);
+            header("Content-Type: " . Data::$mimetypes[$type]);
             break;
     }
+	
     $file = $book->getFilePath ($type, $idData, true);
-    header('Content-Disposition: attachement; filename="' . basename ($file) . '"');
-    header ($config['cops_x_accel_redirect'] . ": " . $config['calibre_internal_directory'] . $file);
+    if ($type == "epub" && $config['cops_update_epub-metadata'])
+    {
+        $book->getUpdatedEpub ($idData);
+        return;
+    }
+    if ($type == "jpg") {
+        header('Content-Disposition: filename="' . basename ($file) . '"');
+    } else {
+        header('Content-Disposition: attachment; filename="' . basename ($file) . '"');
+    }
+    
+    $dir = $config['calibre_internal_directory'];
+    if (empty ($config['calibre_internal_directory'])) {
+        $dir = Base::getDbDirectory ();
+    }
+    
+    if (empty ($config['cops_x_accel_redirect'])) {
+        $filename = $dir . $file;
+        $fp = fopen($filename, 'rb');
+        header("Content-Length: " . filesize($filename));
+        fpassthru($fp);
+    }
+    else {
+        header ($config['cops_x_accel_redirect'] . ": " . $dir . $file);
+    }
 ?>

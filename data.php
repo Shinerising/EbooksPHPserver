@@ -3,7 +3,7 @@
  * COPS (Calibre OPDS PHP Server) class file
  *
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
- * @author     Sébastien Lucas <sebastien@slucas.fr>
+ * @author     SÃ©bastien Lucas <sebastien@slucas.fr>
  */
 
 require_once('base.php');
@@ -74,7 +74,7 @@ class Data extends Base {
         
         if ($config['cops_use_url_rewriting'] == "1")
         {
-			return "http://ebooks.wayshine.us/download.php?n=0&name=".str_replace ("&", "&amp;", rawurlencode($this->book->relativePath."/".$this->getFilename ()));
+			return $config['cops_full_url']."download.php?n=0&name=".str_replace ("&", "&amp;", rawurlencode($this->book->relativePath."/".$this->getFilename ()));
         }
         else
         {
@@ -83,8 +83,8 @@ class Data extends Base {
     }
 	
 	public function getReadLink ($hr) {
-		if($hr==0)return "http://ebooks.wayshine.us/download.php?n=2&name=".str_replace ("&", "&amp;", rawurlencode($this->book->relativePath."/".$this->getFilename ()));
-		else if($hr==1)return "http://ebooks.wayshine.us/read.php?name=".str_replace ("&", "&amp;", rawurlencode($this->book->relativePath."/".$this->getFilename ()));
+		if($hr==0)return $config['cops_full_url']."download.php?n=2&name=".str_replace ("&", "&amp;", rawurlencode($this->book->relativePath."/".$this->getFilename ()));
+		else if($hr==1)return $config['cops_full_url']."read.php?id=".$this->book->id;
 	}
     
     public static function getLink ($book, $type, $mime, $rel, $filename, $idData, $title = NULL)

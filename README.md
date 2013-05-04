@@ -12,4 +12,6 @@ Improved download function for users who can't use dropbox or other clouds servi
 Added a online-reader for epub files;
 Solved some bugs.
 
+This project is still under construction, so it will have many bugs.
+
 You can see DEMO here: http://ebooks.wayshine.us
