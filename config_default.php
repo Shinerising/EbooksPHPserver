@@ -17,8 +17,8 @@
      * BEWARE : it has to end with a /
      */
 	
-    $config['calibre_directory'] = 'http://dl.dropboxusercontent.com/u/44470709/ebooks/calibre/';
-	$config['download_directory'] = 'http://api-content.dropbox.com/u/44470709/ebooks/calibre/';
+    $config['calibre_directory'] = '';
+	$config['download_directory'] = '';
 	
 	/*
      * The local directory of the metadata.db.
@@ -31,14 +31,14 @@
      * The internal directory set in nginx config file
      * or the same directory as calibre_directory with X-Sendfile
      */
-    $config['calibre_internal_directory'] = 'http://dl.dropboxusercontent.com/u/44470709/ebooks/calibre/'; 
+    $config['calibre_internal_directory'] = ''; 
 
     /*
      * Full URL prefix (with trailing /)
      * usefull especially for Opensearch where a full URL is sometimes required
      * For example Mantano requires it.
      */
-    $config['cops_full_url'] = 'http://ebooks.wayshine.us/'; 
+    $config['cops_full_url'] = ''; 
     
     /*
      * Number of recent books to show
